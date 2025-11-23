@@ -35,6 +35,7 @@ export async function fetchAllScrobbles(
 		currentPage: number,
 		totalPages: number,
 		scrobbles: number,
+		allScrobbles?: LastfmScrobble[],
 	) => void,
 	maxScrobbles?: number,
 ): Promise<LastfmScrobble[]> {
@@ -48,7 +49,32 @@ export async function fetchAllScrobbles(
 			break;
 		}
 
-		const data = await fetchRecentTracksPage(username, apiKey, page);
+		// Retry logic for individual pages
+		let retries = 3;
+		let success = false;
+		let data: Awaited<ReturnType<typeof fetchRecentTracksPage>> | null = null;
+
+		while (retries > 0 && !success) {
+			try {
+				data = await fetchRecentTracksPage(username, apiKey, page);
+				success = true;
+			} catch (error) {
+				retries--;
+				if (retries === 0) {
+					// If all retries failed, throw error with context
+					throw new Error(
+						`Failed to fetch page ${page} after 3 attempts: ${error instanceof Error ? error.message : "Unknown error"}`,
+					);
+				}
+				// Wait a bit longer before retrying
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+			}
+		}
+
+		if (!data) {
+			throw new Error(`Failed to fetch page ${page}`);
+		}
+
 		const tracks = data.recenttracks.track;
 
 		// Filter out "now playing" track (doesn't have date)
@@ -57,7 +83,7 @@ export async function fetchAllScrobbles(
 
 		totalPages = Number(data.recenttracks["@attr"].totalPages);
 
-		onProgress?.(page, totalPages, allScrobbles.length);
+		onProgress?.(page, totalPages, allScrobbles.length, [...allScrobbles]);
 
 		page++;
 
