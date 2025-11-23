@@ -45,7 +45,7 @@ const App = () => {
 					// Count scrobbles and keep track of unique tracks
 					const countMap = new Map<
 						string,
-						{ scrobble: typeof withIssues[0]; count: number }
+						{ scrobble: (typeof withIssues)[0]; count: number }
 					>();
 					for (const scrobble of withIssues) {
 						const key = `${scrobble.name}-${scrobble.artist["#text"]}`;
@@ -73,7 +73,9 @@ const App = () => {
 						if (artistCompare !== 0) return artistCompare;
 
 						// Then by album
-						return a.scrobble.album["#text"].localeCompare(b.scrobble.album["#text"]);
+						return a.scrobble.album["#text"].localeCompare(
+							b.scrobble.album["#text"],
+						);
 					});
 				})()
 			: [];
@@ -81,13 +83,23 @@ const App = () => {
 	return (
 		<div className="p-8 min-h-screen bg-gray-50">
 			<h1 className="text-3xl font-bold mb-6 text-center">
-				🎧 <a href="https://github.com/edlessz/scrobble-doctor" target="_blank" rel="noopener noreferrer">Last.fm Scrobble Doctor</a>
+				🎧{" "}
+				<a
+					href="https://github.com/edlessz/scrobble-doctor"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					Last.fm Scrobble Doctor
+				</a>
 			</h1>
 
 			<div className="flex gap-6 max-w-7xl mx-auto">
 				{/* Left side - Form */}
 				<div className="w-96 flex-shrink-0">
-					<form onSubmit={handleSubmit} className="mb-6 bg-white p-6 rounded-lg shadow">
+					<form
+						onSubmit={handleSubmit}
+						className="mb-6 bg-white p-6 rounded-lg shadow"
+					>
 						<div className="mb-4">
 							<label htmlFor="username" className="block mb-2 font-medium">
 								Last.fm Username:
@@ -142,7 +154,9 @@ const App = () => {
 								min="1"
 								className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
 							/>
-							<small className="text-gray-600">Limit recent scrobbles to fetch</small>
+							<small className="text-gray-600">
+								Limit recent scrobbles to fetch
+							</small>
 						</div>
 
 						<button
@@ -162,7 +176,9 @@ const App = () => {
 						<div className="p-4 bg-white rounded-lg shadow">
 							<p className="m-0 text-sm">
 								<strong>Progress:</strong> Page {progress.currentPage} /{" "}
-								{queryParams?.max ? Math.ceil(queryParams.max / 200) : progress.totalPages}
+								{queryParams?.max
+									? Math.ceil(queryParams.max / 200)
+									: progress.totalPages}
 							</p>
 							<p className="mt-2 mb-0 text-sm">
 								<strong>Scrobbles:</strong> {progress.scrobblesFetched}
@@ -188,7 +204,13 @@ const App = () => {
 							</p>
 							<p className="text-sm">
 								<strong>Issues found:</strong>{" "}
-								<span className={problematicScrobbles.length > 0 ? "text-red-600 font-bold" : "text-green-600"}>
+								<span
+									className={
+										problematicScrobbles.length > 0
+											? "text-red-600 font-bold"
+											: "text-green-600"
+									}
+								>
 									{problematicScrobbles.length}
 								</span>
 							</p>
@@ -220,7 +242,9 @@ const App = () => {
 											<th className="text-left p-3 font-semibold">Track</th>
 											<th className="text-left p-3 font-semibold">Artist</th>
 											<th className="text-left p-3 font-semibold">Album</th>
-											<th className="text-left p-3 font-semibold">Last Scrobbled</th>
+											<th className="text-left p-3 font-semibold">
+												Last Scrobbled
+											</th>
 											<th className="text-left p-3 font-semibold">Missing</th>
 											<th className="text-left p-3 font-semibold">Action</th>
 										</tr>
@@ -230,16 +254,20 @@ const App = () => {
 											const { scrobble, count } = item;
 											const missingFields: string[] = [];
 											const missingArtist =
-												!scrobble.artist["#text"] || scrobble.artist["#text"].trim() === "";
+												!scrobble.artist["#text"] ||
+												scrobble.artist["#text"].trim() === "";
 											const missingAlbum =
-												!scrobble.album["#text"] || scrobble.album["#text"].trim() === "";
+												!scrobble.album["#text"] ||
+												scrobble.album["#text"].trim() === "";
 
 											if (missingArtist) missingFields.push("Artist");
 											if (missingAlbum) missingFields.push("Album");
 
 											// Format the date
 											const lastScrobbled = scrobble.date
-												? new Date(Number(scrobble.date.uts) * 1000).toLocaleDateString("en-US", {
+												? new Date(
+														Number(scrobble.date.uts) * 1000,
+													).toLocaleDateString("en-US", {
 														year: "numeric",
 														month: "short",
 														day: "numeric",
@@ -251,8 +279,12 @@ const App = () => {
 													key={`${scrobble.date?.uts}-${scrobble.name}`}
 													className="border-b border-gray-100 hover:bg-gray-50"
 												>
-													<td className="p-3 font-bold text-blue-600">{count}</td>
-													<td className="p-3 font-medium max-w-xs truncate">{scrobble.name}</td>
+													<td className="p-3 font-bold text-blue-600">
+														{count}
+													</td>
+													<td className="p-3 font-medium max-w-xs truncate">
+														{scrobble.name}
+													</td>
 													<td
 														className={`p-3 max-w-xs truncate ${missingArtist ? "text-red-600 italic" : ""}`}
 													>
@@ -263,8 +295,12 @@ const App = () => {
 													>
 														{scrobble.album["#text"] || "(missing)"}
 													</td>
-													<td className="p-3 text-gray-600 whitespace-nowrap">{lastScrobbled}</td>
-													<td className="p-3 text-xs text-red-600">{missingFields.join(", ")}</td>
+													<td className="p-3 text-gray-600 whitespace-nowrap">
+														{lastScrobbled}
+													</td>
+													<td className="p-3 text-xs text-red-600">
+														{missingFields.join(", ")}
+													</td>
 													<td className="p-3">
 														<a
 															href={scrobble.url.replace(
